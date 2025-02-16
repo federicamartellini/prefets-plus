@@ -1,0 +1,30 @@
+{% extends "base.html.twig" %}
+
+{% block titre %}
+Messagerie de {{ identite }}
+{% endblock %}
+
+{% block contenu %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Thématiques</h2>
+                <p class="card-text">L’année de la Mer en France</p>
+                <img src="https://picsum.photos/id/179/200/200" class="img-thumbnail" alt="dog">
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Messages</h2>
+                <p class="card-text">Le village itinérant « La mer en tournée »</p>
+                <p>L’année de la Mer vise à mieux faire connaître le monde marin et à sensibiliser le plus grand nombre à la préservation des océans et de sa biodiversité.
+La ministre de la Transition écologique, de la Biodiversité, de la Forêt, de la Mer et de la Pêche, Agnès Pannier-Runacher, a inauguré mardi 11 février le village itinérant « La mer en tournée ». Il s’installe jusqu’au 23 février 2025 dans le hall de la Cité des Sciences et de l’Industrie, puis fera escale au Festival du livre de Paris du 11 au 13 avril 2025 au Grand Palais.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "base.html.twig" %}
+
+{% block titre_page %}Mes Contacts{% endblock %}
+
+{% block contenu %}
+<div class="container mt-4">
+    <!-- Section des demandes de contact -->
+    {% if contactRequests and contactRequests|length > 0 %}
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="bi bi-person-plus-fill"></i> 
+                Demandes de contact ({{ contactRequests|length }})
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for request in contactRequests %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <img src="/uploads/{{ request.from.photo|default('default-avatar.png') }}" 
+                                         alt="Photo de {{ request.from.prenom }}"
+                                         class="rounded-circle"
+                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                </div>
+                                <h5 class="card-title text-center">{{ request.from.prenom }} {{ request.from.nom }}</h5>
+                                <p class="card-text text-center text-muted">
+                                    <i class="bi bi-geo-alt"></i> {{ request.from.region }}
+                                </p>
+                                {% if request.recommendedBy %}
+                                    <p class="text-center text-muted small">
+                                        <i class="bi bi-person-check"></i>
+                                        Recommandé par {{ request.recommendedBy.prenom }}
+                                    </p>
+                                {% endif %}
+                                <div class="d-flex justify-content-center gap-2 mt-3">
+                                    <button onclick="acceptRequest('{{ request.from._id }}')" 
+                                            class="btn btn-success btn-sm">
+                                        <i class="bi bi-check-lg"></i> Accepter
+                                    </button>
+                                    <button onclick="rejectRequest('{{ request.from._id }}')" 
+                                            class="btn btn-danger btn-sm">
+                                        <i class="bi bi-x-lg"></i> Refuser
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Liste des contacts existante -->
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                {% if user.email is same as('vincente.martino@gmail.com') %}
+                    Liste de tous les préfets
+                {% else %}
+                    Mes contacts
+                {% endif %}
+            </h5>
+            {% if user.email is same as('vincente.martino@gmail.com') %}
+                <span class="badge bg-warning">Mode Administrateur</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if contacts and contacts|length > 0 %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for contact in contacts %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        <img src="/uploads/{{ contact.photo|default('default-avatar.png') }}" 
+                                             alt="Photo de {{ contact.prenom }}"
+                                             class="rounded-circle"
+                                             style="width: 80px; height: 80px; object-fit: cover;">
+                                    </div>
+                                    <h5 class="card-title text-center mb-3">
+                                        {{ contact.prenom }} {{ contact.nom }}
+                                        {% if contact.role is same as('admin') %}
+                                            <span class="admin-badge">Admin</span>
+                                        {% endif %}
+                                    </h5>
+                                    {% if contact.region %}
+                                        <p class="card-text text-center text-muted mb-3">
+                                            <i class="bi bi-geo-alt"></i> {{ contact.region }}
+                                        </p>
+                                    {% endif %}
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="/prefets/{{ contact._id }}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-person-circle"></i> Voir le profil
+                                        </a>
+                                        <a href="/messages-prives/{{ contact._id }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-envelope"></i> Message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Vous n'avez pas encore de contacts.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+async function acceptRequest(userId) {
+    try {
+        const response = await fetch('/contacts/accept', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fromId: userId })
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Une erreur est survenue');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue');
+    }
+}
+
+async function rejectRequest(userId) {
+    if (!confirm('Êtes-vous sûr de vouloir refuser cette demande ?')) return;
+
+    try {
+        const response = await fetch('/contacts/reject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fromId: userId })
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Une erreur est survenue');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue');
+    }
+}
+</script>
+{% endblock %}

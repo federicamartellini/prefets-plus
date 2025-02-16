@@ -1,0 +1,376 @@
+{% extends "base.html.twig" %}
+
+{% block titre_onglet %}Mes Messages Privés - Prefet +{% endblock %}
+
+{% block contenu %}
+<div class="messages-container">
+    <div class="row g-0">
+        <!-- Liste des amis et conversations -->
+        <div class="col-md-4 conversations-sidebar">
+            <div class="card h-100 border-0">
+                <div class="card-header bg-primary text-white">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active text-white" data-bs-toggle="tab" data-bs-target="#conversations" type="button">
+                                Conversations <span class="badge bg-light text-primary ms-1" id="total-unread"></span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#amis" type="button">
+                                Amis
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="tab-content">
+                    <!-- Onglet Conversations -->
+                    <div class="tab-pane fade show active" id="conversations">
+                        <div class="contacts-list">
+                            {% if conversations is empty %}
+                                <div class="text-center p-4">
+                                    <i class="bi bi-chat-dots fs-2 text-muted"></i>
+                                    <p class="mt-3 text-muted">Aucune conversation</p>
+                                </div>
+                            {% else %}
+                                {% for conversation in conversations %}
+                                    <button class="conversation-item" onclick="selectConversation('{{ conversation._id._id }}', '{{ conversation._id.prenom }} {{ conversation._id.nom }}')">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ conversation._id.prenom }} {{ conversation._id.nom }}</h6>
+                                                <small class="text-muted d-block">{{ conversation._id.region }}</small>
+                                            </div>
+                                            {% if conversation.unreadCount > 0 %}
+                                                <span class="badge bg-primary rounded-pill">{{ conversation.unreadCount }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </button>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Onglet Amis -->
+                    <div class="tab-pane fade" id="amis">
+                        <div class="contacts-list">
+                            {% if user.contacts is empty %}
+                                <div class="text-center p-4">
+                                    <i class="bi bi-people fs-2 text-muted"></i>
+                                    <p class="mt-3 text-muted">Aucun ami pour le moment</p>
+                                    <a href="/contacts" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-person-plus"></i> Ajouter des contacts
+                                    </a>
+                                </div>
+                            {% else %}
+                                {% for contact in user.contacts %}
+                                    <div class="friend-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ contact.prenom }} {{ contact.nom }}</h6>
+                                                <small class="text-muted">{{ contact.region }}</small>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm" 
+                                                    onclick="selectConversation('{{ contact._id }}', '{{ contact.prenom }} {{ contact.nom }}')">
+                                                <i class="bi bi-chat-dots"></i> Message
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de messages -->
+        <div class="col-md-8">
+            <div class="card h-100 border-0">
+                <div class="card-header bg-primary text-white sticky-top">
+                    <h5 class="mb-0" id="conversation-title">Sélectionnez une conversation</h5>
+                </div>
+                <div class="messages-area" id="messages">
+                    <div class="empty-state">
+                        <i class="bi bi-chat-text"></i>
+                        <p>Sélectionnez une conversation pour voir les messages</p>
+                    </div>
+                </div>
+                <div class="message-input-container">
+                    <form id="message-form">
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="message-input" 
+                                   class="form-control" 
+                                   placeholder="Écrivez votre message..." 
+                                   disabled>
+                            <button class="btn btn-primary" type="submit" disabled>
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentContactId = null;
+
+function selectConversation(contactId, contactName) {
+    currentContactId = contactId;
+    document.getElementById('conversation-title').textContent = contactName;
+    
+    // Activer le formulaire
+    const messageInput = document.getElementById('message-input');
+    const submitButton = document.querySelector('#message-form button');
+    messageInput.disabled = false;
+    submitButton.disabled = false;
+    messageInput.placeholder = "Écrivez votre message...";
+    
+    loadMessages(contactId);
+}
+
+function loadMessages(contactId) {
+    fetch(`/messages-prives/${contactId}`)
+        .then(response => response.json())
+        .then(messages => {
+            displayMessages(messages);
+            
+            // Marquer les messages comme lus
+            fetch(`/messages-prives/read/${contactId}`, { method: 'POST' })
+                .then(() => updateUnreadCount());
+        });
+}
+
+function displayMessage(message) {
+    const isOwnMessage = message.expediteur._id === '{{ user._id }}';
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-item ${isOwnMessage ? 'message-sent' : 'message-received'}`;
+    
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <small class="message-sender">${isOwnMessage ? 'Vous' : message.expediteur.prenom}</small>
+            <div class="message-text">${message.message}</div>
+            <small class="message-time">${new Date(message.dateCreation).toLocaleString()}</small>
+        </div>
+    `;
+    
+    document.getElementById('messages').appendChild(messageDiv);
+}
+
+// Ajout de la gestion des dates dans l'affichage des messages
+function displayMessages(messages) {
+    const messagesDiv = document.getElementById('messages');
+    messagesDiv.innerHTML = '';
+    
+    let currentDate = '';
+    
+    messages.forEach(message => {
+        const messageDate = new Date(message.dateCreation).toLocaleDateString();
+        
+        if (messageDate !== currentDate) {
+            currentDate = messageDate;
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'messages-date-separator';
+            dateDiv.innerHTML = `<span>${currentDate}</span>`;
+            messagesDiv.appendChild(dateDiv);
+        }
+        
+        displayMessage(message);
+    });
+    
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+document.getElementById('message-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    
+    if (message && currentContactId) {
+        try {
+            const response = await fetch('/messages-prives/envoyer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    destinataire: currentContactId,
+                    message: message
+                })
+            });
+
+            if (response.ok) {
+                const newMessage = await response.json();
+                displayMessage(newMessage);
+                input.value = '';
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi du message:', error);
+        }
+    }
+});
+
+// Ajout du compteur total de messages non lus
+function updateUnreadCount() {
+    const badges = document.querySelectorAll('.badge.bg-primary.rounded-pill');
+    const total = Array.from(badges).reduce((sum, badge) => sum + parseInt(badge.textContent), 0);
+    document.getElementById('total-unread').textContent = total || '';
+}
+
+// Mise à jour initiale du compteur
+updateUnreadCount();
+
+// Ajout de la gestion des onglets Bootstrap si nécessaire
+document.addEventListener('DOMContentLoaded', function() {
+    const tabElements = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabElements.forEach(tab => {
+        tab.addEventListener('click', function(event) {
+            event.preventDefault();
+            const target = document.querySelector(this.dataset.bsTarget);
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            target.classList.add('show', 'active');
+            this.classList.add('active');
+        });
+    });
+});
+</script>
+
+<style>
+.messages-container {
+    height: calc(100vh - 160px);
+    margin: 1rem auto;
+    max-width: 1400px;
+}
+
+.conversations-sidebar {
+    border-right: 1px solid rgba(0,0,0,.125);
+    height: 100%;
+}
+
+.contacts-list {
+    height: calc(100% - 56px);
+    overflow-y: auto;
+}
+
+.conversation-item {
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    transition: all 0.2s ease;
+}
+
+.conversation-item:hover {
+    background-color: rgba(0,0,0,.03);
+}
+
+.conversation-item.active {
+    background-color: rgba(0,0,0,.05);
+}
+
+.messages-area {
+    height: calc(100% - 120px);
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.message-input-container {
+    padding: 1rem;
+    background-color: white;
+    border-top: 1px solid rgba(0,0,0,.125);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.message-bubble {
+    max-width: 75%;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 1rem;
+}
+
+.message-sent {
+    margin-left: auto;
+    background-color: #007bff;
+    color: white;
+}
+
+.message-received {
+    margin-right: auto;
+    background-color: white;
+}
+
+@media (max-width: 768px) {
+    .messages-container {
+        height: calc(100vh - 140px);
+        margin: 0;
+    }
+
+    .conversations-sidebar {
+        height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,.125);
+    }
+
+    .messages-area {
+        height: calc(60vh - 120px);
+    }
+
+    .contacts-list {
+        height: calc(40vh - 56px);
+    }
+}
+
+/* ... styles existants ... */
+
+.nav-tabs .nav-link {
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent;
+    border-bottom: 2px solid white;
+}
+
+.friend-item {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    transition: all 0.2s ease;
+}
+
+.friend-item:hover {
+    background-color: rgba(0,0,0,.03);
+}
+
+.tab-content {
+    height: calc(100% - 56px);
+}
+
+.tab-pane {
+    height: 100%;
+}
+
+/* ... reste des styles ... */
+</style>
+{% endblock %}

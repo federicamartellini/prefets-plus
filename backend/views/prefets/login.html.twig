@@ -1,0 +1,27 @@
+{% extends "base.html.twig" %} 
+
+{% block titre %} Me connecter <br>
+    Vous êtes en train de vos connecter à votre espace personnel du réseau social Prefet + {% endblock %}
+    
+{% extends "base.html.twig" %}
+
+{% block titre %}Connexion{% endblock %}
+
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<form action="/login" method="post">
+    <div>
+        <label>Email :</label>
+        <input type="email" name="email" required>
+    </div>
+    <div>
+        <label>Mot de passe :</label>
+        <input type="password" name="password" required>
+    </div>
+    <button type="submit">Se connecter</button>
+</form>
+
+<p>Pas encore inscrit ? <a href="/register">Créer un compte</a></p>
+{% endblock %}

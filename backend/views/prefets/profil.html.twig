@@ -1,0 +1,177 @@
+{% extends "base.html.twig" %}
+
+{% block titre_page %}Profil de {{ prefet.prenom }} {{ prefet.nom }}{% endblock %}
+
+{% block contenu %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Informations principales -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations du préfet</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Photo de profil -->
+                    <div class="text-center mb-4">
+                        <img src="/uploads/{{ prefet.photo|default('default-avatar.png') }}" 
+                             alt="Photo de {{ prefet.prenom }}"
+                             class="rounded-circle"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    </div>
+
+                    <!-- Informations détaillées -->
+                    <div class="info-list">
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Nom complet</h6>
+                            <p>{{ prefet.prenom }} {{ prefet.nom }}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Email</h6>
+                            <p>{{ prefet.email }}</p>
+                        </div>
+
+                        {% if prefet.region %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Région</h6>
+                            <p><i class="bi bi-geo-alt"></i> {{ prefet.region }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if prefet.pseudonyme %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Pseudonyme</h6>
+                            <p>{{ prefet.pseudonyme }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if prefet.genre %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Genre</h6>
+                            <p>{{ prefet.genre }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if prefet.presentation %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Présentation</h6>
+                            <p>{{ prefet.presentation }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if prefet.preferences %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Préférences de notification</h6>
+                            <p>
+                                {% if prefet.preferences.notifications.email %}
+                                <span class="badge bg-success me-2">Email activé</span>
+                                {% endif %}
+                                {% if prefet.preferences.notifications.site %}
+                                <span class="badge bg-success">Notifications site activées</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Membre depuis</h6>
+                            <p><i class="bi bi-calendar3"></i> {{ prefet.dateCreation|date("d/m/Y") }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Badge Admin si applicable -->
+                    {% if prefet.role is same as('admin') %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-shield-fill-check"></i> Administrateur du site
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3 class="mb-2">{{ prefet.contacts|length|default(0) }}</h3>
+                            <small class="text-muted">Contacts</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="mb-2">{{ messages|length|default(0) }}</h3>
+                            <small class="text-muted">Messages</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section des messages -->
+        <div class="col-md-8">
+            {% if isAdmin or user %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form id="messageForm" class="mb-4">
+                            <div class="form-group">
+                                <label for="message">Écrire un message</label>
+                                <textarea class="form-control" id="message" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">
+                                <i class="bi bi-send"></i> Publier
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Liste des messages -->
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="card-subtitle text-muted">
+                                    {{ message.auteur.prenom }} {{ message.auteur.nom }}
+                                </h6>
+                                <small class="text-muted">
+                                    {{ message.dateCreation|date('d/m/Y H:i') }}
+                                </small>
+                            </div>
+                            <p class="card-text">{{ message.contenu }}</p>
+                            
+                            {% if isAdmin %}
+                                <button class="btn btn-danger btn-sm float-end" 
+                                        onclick="deleteMessage('{{ message._id }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if isAdmin %}
+<script>
+async function deleteMessage(messageId) {
+    if (confirm('Voulez-vous vraiment supprimer ce message ?')) {
+        try {
+            const response = await fetch(`/admin/message/${messageId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                location.reload();
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    }
+}
+</script>
+{% endif %}
+{% endblock %}

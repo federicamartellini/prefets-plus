@@ -1,0 +1,42 @@
+{% extends "base.html.twig" %}
+
+{% block titre_onglet %}Accueil - Prefet +{% endblock %}
+
+{% block titre_page %}
+Bienvenue sur <span class="text-warning">Prefet +</span> <br>
+Le Réseau Social des Préfets Régionaux !
+{% endblock %}
+
+{% block contenu %}
+<div class="text-center mb-4">
+    <p class="lead">Prefet + : pour une administration plus simple et plus efficace !</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Nouveautés</h2>
+                <p class="card-text">Permis de conduire à 17 ans</p>
+                <p class="card-text">
+                    Le permis de conduire est accessible aux jeunes à partir de 17 ans depuis le 1er janvier 2024.
+290 050 jeunes de 17 ans ont passé l'examen pratique du permis de conduire en 2024, soit 33,7 %.
+                </p>
+                <img src="https://picsum.photos/id/191/300/200" class="img-fluid rounded" alt="voiture électrique">
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">Écologie</h2>
+                <p class="card-text">Aides Solaires Région 2025 : L'exemple de MaPrimeRénov'. </p>
+                     <p class="card-text">Cette aide de l'ANAH soutient les propriétaires, bailleurs et copropriétés pour financer leurs travaux de rénovation énergétique. Notamment, avec les panneaux solaires et photovoltaïques.
+                </p>
+                <img src="https://picsum.photos/id/182/300/200" class="img-fluid rounded" alt="voiture électrique">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html.twig" %} 
+
+{% block titre_onglet %}Liste des Préfets - Prefet +{% endblock %}
+
+{% block titre %}
+ Liste des préfets de France 
+{% endblock %}
+
+{% block contenu %} 
+    <div class="container mt-4">
+        <h2 class="text-center">Liste des préfets de France</h2>
+        <p class="text-center text-muted mb-4">La liste est mise à jour régulièrement</p>
+
+        {% if prefets is not empty %}
+            <div class="table-responsive">
+                <table class="table text-center" id="tableauPrefets">
+                    <thead>
+                        <tr class="table-dark">
+                            <th>Nom</th>
+                            <th>Prénom</th> 
+                            <th>Région</th>             
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prefet in prefets %}
+                            <tr>
+                                <td>{{ prefet.nom }}</td>
+                                <td>{{ prefet.prenom }}</td>
+                                <td>{{ prefet.region }}</td>
+                                <td>
+                                    {% if user %}
+                                        {% if user._id != prefet._id %}
+                                            {% if prefet._id not in contactIds %}
+                                                <button class="btn btn-primary btn-sm add-contact" data-id="{{ prefet._id }}">
+                                                    <i class="bi bi-person-plus"></i> Ajouter
+                                                </button>
+                                            {% else %}
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check2"></i> Contact
+                                                </span>
+                                            {% endif %}
+                                            <a href="/prefets/{{ prefet.prenom }}-{{ prefet.nom }}" class="btn btn-outline-primary btn-sm ms-2">
+                                                <i class="bi bi-eye"></i> Voir
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        <a href="/login" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-box-arrow-in-right"></i> Se connecter pour contacter
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                Aucun préfet trouvé dans la base de données.
+            </div>
+        {% endif %}
+    </div>
+
+    {% if user %}
+    <script>
+    document.querySelectorAll('.add-contact').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const prefetId = e.target.dataset.id;
+            try {
+                const response = await fetch(`/contacts/add/${prefetId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    e.target.outerHTML = `<span class="badge bg-success"><i class="bi bi-check2"></i> Contact ajouté</span>`;
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
+    });
+    </script>
+    {% endif %}
+{% endblock %}
+
+

@@ -1,0 +1,83 @@
+{% extends "base.html.twig" %}
+
+{% block titre %}Mon Profil - Prefet +{% endblock %}
+
+{% block titre_page %}
+Mon Profil <br>
+<span class="text-muted">Gérez vos informations personnelles</span>
+{% endblock %}
+
+{% block contenu %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Informations personnelles</h3>
+                    <div class="mb-3">
+                        <label class="text-muted">Nom</label>
+                        <p class="h5">{{ user.nom }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted">Prénom</label>
+                        <p class="h5">{{ user.prenom }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted">Région</label>
+                        <p class="h5">{{ user.region }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted">Email</label>
+                        <p class="h5">{{ user.email }}</p>
+                    </div>
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            Modifier mon profil
+                        </button>
+                        <button class="btn btn-outline-danger">
+                            Supprimer mon compte
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour modifier le profil -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifier mon profil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/profil/edit" method="POST">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">Nom</label>
+                        <input type="text" class="form-control" id="nom" name="nom" value="{{ user.nom }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prenom" class="form-label">Prénom</label>
+                        <input type="text" class="form-control" id="prenom" name="prenom" value="{{ user.prenom }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="region" class="form-label">Région</label>
+                        <select class="form-control" id="region" name="region" required>
+                            <option value="Ile-de-France" {% if user.region == 'Ile-de-France' %}selected{% endif %}>Île-de-France</option>
+                            <option value="Occitanie" {% if user.region == 'Occitanie' %}selected{% endif %}>Occitanie</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Enregistrer les modifications</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

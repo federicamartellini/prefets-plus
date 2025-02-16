@@ -1,0 +1,42 @@
+.admin-actions {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.admin-message-actions {
+    opacity: 0;
+    transition: opacity 0.3s;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.message-container:hover .admin-message-actions {
+    opacity: 1;
+}
+
+.admin-badge {
+    background-color: #fd9d0d;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.admin-message {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-left: 4px solid #0d6efd;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.admin-controls {
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+}

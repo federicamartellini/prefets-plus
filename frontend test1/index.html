@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réseau Social - Chez Nous</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Bienvenue "Chez Prefets + !"<br> Le Réseau Social des prefets régionaux !</h1>
+        <nav>
+            <ul>
+                <li><a href="#" id="authLink">Connexion</a></li>
+            </ul>
+            <ul>
+                <li><a href="#">Accueil</a></li>
+                <li><a href="#">Profil</a></li>
+                <li><a href="#">Messages</a></li>
+                <li><a href="#">Amis</a></li>
+                <li><a href="#">Calendrier</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Page d'accueil -->
+        <section id="home" class="bento-grid">
+            <div class="bento-item" id="featured">
+                <h2>À la Une</h2>
+                <ul id="featured-list">
+                    <div id="incru"></div>  <!--petit jeu 1: cette balise avec un identifiant est VIDE mais elle se remplit avec l'INCRUSTATION :)  
+                    <script>
+                        document.querySelector("#incru").innerHTML ="test d'incrustation d'une balise avec identifiant"; // test pour recuperer la balise div qui a un identifiant avec queryselector faisant une incrustation de code javascript dans le HTML avec la balise script          
+                    </script>
+                    -->
+                    <div class="incru"></div> <!-- petit jeu 2: cette balise avec une class est VIDE mais elle se remplit avec l'INCRUSTATION :)  
+                    <script>
+                        document.querySelector(".incru").innerHTML ="test d'incrustation avec la class"; // test pour recuperer la balise div avec une class avec queryselector faisant une incrustation de code javascript dans le HTML avec la balise script          
+                    </script>
+                    -->
+                    
+                    <!-- Les messages à la une -->
+                </ul>
+            </div>
+            <div class="bento-item" id="favorite">
+                <h2>Coup de cœur</h2>
+                <img src="images/residence.jpg" alt="Résidence">
+                <p>Découvrez nos activités communautaires et nos projets en cours !</p>
+            </div>
+            <div class="bento-item" id="calendar">
+                <h2>Calendrier</h2>
+                <!-- Intégration du calendrier -->
+            </div>
+            <div class="bento-item" id="topics-grid">
+                <h2>Topics</h2>
+                <ul>
+                    <li><img src="" alt="jardin"  title="Venez jardiner"/>Gestion du jardin</li>
+                    <li>Gestion des poubelles</li>
+                    <li>Bruits nocturnes</li>
+                    <li>Travaux de l'immeuble</li>
+                    <!-- Autres topics -->
+                </ul>
+            </div>
+        </section>
+
+        <!-- Chat à droite -->
+        <aside id="chat">
+            <h3>Chat</h3>
+            <button id="viewChatsBtn">Voir tous les chats</button>
+            <div id="chat-window">
+                <input type="text" placeholder="Votre message..." id="chatInput">
+                <button id="sendBtn">Envoyer</button>
+            </div>
+        </aside>
+    </main>
+   
+    <footer>
+        
+        <p>&copy; 2025 Chez Nous ! Le Réseau Social de l'immeuble</p>
+        
+    </footer>
+
+    <script src="script.js"></script>
+    
+</body>
+</html>

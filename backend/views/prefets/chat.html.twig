@@ -1,0 +1,441 @@
+{% extends "base.html.twig" %}
+
+{% block head %}
+    {{ parent() }}
+    <link rel="stylesheet" href="/css/chat.css">
+{% endblock %}
+
+{% block titre_onglet %}Chat - Prefet +{% endblock %}
+
+{% block titre_page %}Chat{% endblock %}
+
+{% block contenu %}
+<div class="chat-wrapper">
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <!-- Liste des contacts -->
+            <div class="col-md-3 contacts-sidebar">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Contacts</h5>
+                    </div>
+                    <div class="contacts-list">
+                        {% for contact in contacts %}
+                            <button class="contact-item" 
+                                    data-contact-id="{{ contact._id }}"
+                                    onclick="startChat('{{ contact._id }}', '{{ contact.prenom }} {{ contact.nom }}')">
+                                <div class="d-flex align-items-center p-3">
+                                    <div class="contact-avatar">
+                                        <img src="/uploads/{{ contact.photo|default('default-avatar.png') }}" 
+                                             alt="Photo de {{ contact.prenom }}"
+                                             class="rounded-circle">
+                                    </div>
+                                    <div class="ms-3 flex-grow-1">
+                                        <div class="fw-bold">{{ contact.prenom }} {{ contact.nom }}</div>
+                                        <small class="text-muted">{{ contact.region }}</small>
+                                    </div>
+                                    <div class="unread-badge" id="unread-{{ contact._id }}" style="display: none;">
+                                        <span class="badge bg-danger rounded-pill"></span>
+                                    </div>
+                                </div>
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zone de chat -->
+            <div class="col-md-9 chat-main">
+                <div class="card chat-container">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0" id="chatTitle">Sélectionnez un contact</h5>
+                    </div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input" id="messageForm" style="display: none;">
+                        <form class="message-form">
+                            <div class="input-group">
+                                <textarea class="form-control" 
+                                          id="messageInput" 
+                                          placeholder="Écrivez votre message..." 
+                                          rows="2"></textarea>
+                                <button class="btn btn-custom" type="submit"></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Redéfinir les variables et la structure de base */
+:root {
+    --header-height: 56px;
+    --footer-height: 60px;
+    --chat-input-height: 60px;
+}
+
+.chat-wrapper {
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    padding: 1rem 0;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.contacts-sidebar {
+    background: #fff;
+    margin-bottom: 1rem;
+}
+
+.contacts-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.chat-input {
+    background: #fff;
+    padding: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.message-form {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column; /* Change en colonne */
+    align-items: stretch; /* Étire les éléments */
+    gap: 0.5rem;
+    width: 100%;
+}
+
+#messageInput {
+    width: 100%;
+    resize: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    min-height: 45px;
+    border: 1px solid #dee2e6;
+}
+
+.btn-custom {
+    width: 100%; /* Prend toute la largeur */
+    height: 45px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+
+
+.btn-custom i {
+    font-size: 1.2rem;
+}
+
+/* Media Queries simplifiées */
+@media (max-width: 768px) {
+    .chat-wrapper {
+        padding: 0;
+    }
+
+    .contacts-sidebar {
+        position: relative;
+        z-index: 1;
+    }
+
+    .contacts-list {
+        max-height: 300px;
+    }
+
+    .chat-messages {
+        max-height: calc(100vh - var(--header-height) - var(--footer-height) - var(--chat-input-height) - 300px);
+    }
+
+    .input-group {
+        gap: 0.25rem;
+    }
+    
+    #messageInput {
+        min-height: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .contacts-list {
+        max-height: 200px;
+    }
+
+    .chat-messages {
+        max-height: calc(100vh - var(--header-height) - var(--footer-height) - var(--chat-input-height) - 200px);
+    }
+}
+
+/* Animations et transitions */
+.chat-input, .contacts-sidebar {
+    transition: all 0.3s ease;
+}
+
+/* Améliorations visuelles */
+.message {
+    max-width: 70%;
+    margin-bottom: 1rem;
+    clear: both;
+}
+
+.message-own {
+    float: left;  /* Messages envoyés à gauche */
+}
+
+.message-other {
+    float: right;  /* Messages reçus à droite */
+}
+
+.message-content {
+    padding: 0.75rem 1rem;
+    border-radius: 1.25rem;
+    position: relative;
+    word-break: break-word;
+}
+
+.message-own .message-content {
+    background-color: #e3f2fd;  /* Bleu clair pour les messages envoyés */
+    color: #1e88e5;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.message-other .message-content {
+    background-color: #6c757d;  /* Gris foncé pour les messages reçus */
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.message-own .message-time {
+    color: #90a4ae !important;  /* Gris pour l'heure des messages envoyés */
+}
+
+.message-other .message-time {
+    color: rgba(255, 255, 255, 0.7) !important;  /* Blanc transparent pour l'heure des messages reçus */
+}
+</style>
+
+<!-- Ajouter un bouton toggle pour la liste des contacts sur mobile -->
+<div class="d-md-none position-fixed top-0 end-0 p-2" style="z-index: 1031;">
+    <button class="btn btn-primary btn-sm" onclick="toggleContacts()">
+        <i class="bi bi-list"></i>
+    </button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let currentContactId = null;
+let typingTimeout = null;
+
+// Connexion au chat
+socket.on('connect', () => {
+    socket.emit('user connected', '{{ user._id }}');
+});
+
+function startChat(contactId, contactName) {
+    // Si on change de contact, vider le chat
+    if (currentContactId !== contactId) {
+        document.getElementById('chatMessages').innerHTML = '';
+    }
+    
+    currentContactId = contactId;
+    document.getElementById('chatTitle').textContent = `Chat avec ${contactName}`;
+    document.getElementById('messageForm').style.display = 'flex';
+    
+    const roomId = [contactId, '{{ user._id }}'].sort().join('_');
+    socket.emit('join chat', { roomId, userId: '{{ user._id }}' });
+    
+    // Masquer l'indicateur de messages non lus
+    document.getElementById(`unread-${contactId}`).style.display = 'none';
+    
+    // Charger l'historique des messages
+    loadMessages(roomId);
+
+    // Fermer la liste des contacts sur mobile
+    if (window.innerWidth <= 768) {
+        document.querySelector('.contacts-sidebar').classList.add('collapsed');
+    }
+}
+
+async function loadMessages(roomId) {
+    try {
+        const response = await fetch(`/chat/messages/${roomId}`);
+        const messages = await response.json();
+        
+        // Trier les messages par date
+        messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        // Afficher les messages sans le paramètre append
+        displayMessages(messages);
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
+}
+
+function displayMessages(messages, append = false) {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    if (!append) {
+        chatMessages.innerHTML = '';
+    }
+    
+    messages.forEach(message => {
+        const isOwn = message.sender._id === '{{ user._id }}';
+        const messageEl = createMessageElement(message, isOwn);
+        chatMessages.appendChild(messageEl);
+    });
+    
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function createMessageElement(message, isOwn) {
+    const div = document.createElement('div');
+    div.className = `message ${isOwn ? 'message-own' : 'message-other'}`;
+    
+    const time = new Date(message.timestamp).toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    div.innerHTML = `
+        <div class="message-content">
+            ${message.content}
+            <div class="message-time small ${isOwn ? 'text-white-50' : 'text-muted'}">
+                ${time}
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// Gestion de l'envoi des messages
+document.querySelector('.message-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('messageInput');
+    const content = input.value.trim();
+    
+    if (!content || !currentContactId) return;
+    
+    const roomId = [currentContactId, '{{ user._id }}'].sort().join('_');
+    socket.emit('chat message', {
+        content,
+        sender: {
+            _id: '{{ user._id }}',
+            nom: '{{ user.nom }}',
+            prenom: '{{ user.prenom }}'
+        },
+        receiver: currentContactId,
+        roomId
+    });
+    
+    input.value = '';
+    input.style.height = 'auto';
+});
+
+// Gestion de la frappe
+document.getElementById('messageInput').addEventListener('input', function() {
+    if (currentContactId) {
+        const roomId = [currentContactId, '{{ user._id }}'].sort().join('_');
+        socket.emit('typing start', {
+            roomId,
+            userId: '{{ user._id }}',
+            name: '{{ user.prenom }}'
+        });
+        
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            socket.emit('typing stop', {
+                roomId,
+                userId: '{{ user._id }}'
+            });
+        }, 1000);
+    }
+});
+
+// Réception des messages en temps réel
+socket.on('chat message', (message) => {
+    if (currentContactId && (
+        message.sender._id === currentContactId || 
+        message.sender._id === '{{ user._id }}'
+    )) {
+        // Ajouter le nouveau message à l'historique existant
+        displayMessages([message], true);
+    } else {
+        // Afficher l'indicateur de message non lu
+        const unreadBadge = document.getElementById(`unread-${message.sender._id}`);
+        if (unreadBadge) {
+            unreadBadge.style.display = 'block';
+        }
+    }
+});
+
+// Gestion de l'indicateur de frappe
+socket.on('typing start', (data) => {
+    if (currentContactId === data.userId) {
+        document.getElementById('typingIndicator').style.display = 'block';
+    }
+});
+
+socket.on('typing stop', (data) => {
+    if (currentContactId === data.userId) {
+        document.getElementById('typingIndicator').style.display = 'none';
+    }
+});
+
+// Auto-resize du textarea
+document.getElementById('messageInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+});
+
+// Envoi avec Entrée (Shift+Entrée pour nouvelle ligne)
+document.getElementById('messageInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.querySelector('.message-form').dispatchEvent(new Event('submit'));
+    }
+});
+
+// Ajouter cette fonction pour gérer le toggle de la liste des contacts
+function toggleContacts() {
+    const sidebar = document.querySelector('.contacts-sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+// Ajuster la hauteur en cas de redimensionnement
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        document.querySelector('.contacts-sidebar').classList.remove('collapsed');
+    }
+});
+</script>
+{% endblock %}

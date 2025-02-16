@@ -1,0 +1,201 @@
+{% extends "base.html.twig" %}
+
+{% block titre_onglet %}Inscription - Prefet +{% endblock %}
+
+{% block titre_page %}
+<h2>Créer un compte</h2>
+<p class="text-muted">Les champs marqués d'un * sont obligatoires</p>
+{% endblock %}
+
+{% block contenu %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Inscription</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/register" method="POST" enctype="multipart/form-data" id="registerForm">
+                        <!-- Informations de base -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Prénom *</label>
+                                <input type="text" name="prenom" class="form-control" required 
+                                       value="{{ values.prenom|default('') }}" tabindex="1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nom *</label>
+                                <input type="text" name="nom" class="form-control" required 
+                                       value="{{ values.nom|default('') }}" tabindex="2">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Pseudonyme</label>
+                            <input type="text" name="pseudonyme" class="form-control" tabindex="3">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Genre</label>
+                                <select name="genre" class="form-select" tabindex="4">
+                                    <option value="Homme">Homme</option>
+                                    <option value="Femme">Femme</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Âge</label>
+                                <input type="number" name="age" class="form-control" min="18" max="100" tabindex="5">
+                            </div>
+                        </div>
+
+                        <!-- Coordonnées -->
+                        <div class="mb-3">
+                            <label class="form-label">Région</label>
+                            <select name="region" class="form-select" tabindex="6">
+                                <option value="">Sélectionnez une région</option>
+                                {% set regions = [
+                                    'Auvergne-Rhône-Alpes',
+                                    'Bourgogne-Franche-Comté',
+                                    'Bretagne',
+                                    'Centre-Val de Loire',
+                                    'Corse',
+                                    'Grand Est',
+                                    'Hauts-de-France',
+                                    'Île-de-France',
+                                    'Normandie',
+                                    'Nouvelle-Aquitaine',
+                                    'Occitanie',
+                                    'Pays de la Loire',
+                                    'Provence-Alpes-Côte d\'Azur'
+                                ] %}
+                                {% for region in regions|sort %}
+                                    <option value="{{ region }}">{{ region }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Authentification -->
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" class="form-control" required tabindex="7">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mot de passe *</label>
+                                <div class="input-group">
+                                    <input type="password" name="password" class="form-control" id="password" required tabindex="8">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirmer le mot de passe *</label>
+                                <div class="input-group">
+                                    <input type="password" name="confirmPassword" class="form-control" id="confirmPassword" required tabindex="9">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Photo -->
+                        <div class="mb-3">
+                            <label class="form-label">Photo de profil</label>
+                            <input type="file" name="photo" class="form-control" accept="image/*" tabindex="10">
+                        </div>
+
+                        <!-- Présentation -->
+                        <div class="mb-3">
+                            <label class="form-label">Présentation</label>
+                            <textarea name="presentation" class="form-control" rows="3" maxlength="1000" tabindex="11"></textarea>
+                        </div>
+
+                        <!-- Préférences -->
+                        <div class="mb-3">
+                            <h5>Préférences de confidentialité</h5>
+                            <div class="form-check">
+                                <input type="checkbox" name="notifications_email" class="form-check-input" checked tabindex="12">
+                                <label class="form-check-label">Recevoir les notifications par email</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" name="notifications_site" class="form-check-input" checked tabindex="13">
+                                <label class="form-check-label">Recevoir les notifications sur le site</label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" tabindex="14">
+                                <i class="bi bi-person-plus-fill me-2"></i>Créer mon compte
+                            </button>
+                            <p class="text-center mt-3">
+                                Déjà membre ? <a href="/login">Se connecter</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+
+    // Fonction pour basculer la visibilité du mot de passe
+    function togglePasswordVisibility(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        
+        button.addEventListener('click', () => {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            // Change l'icône
+            const icon = button.querySelector('i');
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+    }
+
+    togglePasswordVisibility('password', 'togglePassword');
+    togglePasswordVisibility('confirmPassword', 'toggleConfirmPassword');
+    
+    // Soumission du formulaire
+    form.addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        if (password.length < 1) {
+            e.preventDefault();
+            alert('Veuillez entrer un mot de passe');
+            return;
+        }
+    });
+
+    // Auto-remplissage du pseudonyme si non renseigné
+    const prenomInput = form.querySelector('[name="prenom"]');
+    const nomInput = form.querySelector('[name="nom"]');
+    const pseudoInput = form.querySelector('[name="pseudonyme"]');
+
+    [prenomInput, nomInput].forEach(input => {
+        input.addEventListener('blur', () => {
+            if (!pseudoInput.value && prenomInput.value && nomInput.value) {
+                pseudoInput.value = `${prenomInput.value} ${nomInput.value}`;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
